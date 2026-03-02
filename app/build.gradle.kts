@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    id("com.google.devtools.ksp")
-    alias(libs.plugins.compose.compiler)
     kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -77,6 +77,27 @@ dependencies {
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+
+    // Serialization
+    implementation(libs.kotlin.serialization)
+
+    // Collections
+    implementation(libs.kotlin.collections.immutable)
+
+    // Hilt core
+    implementation(libs.hilt.core)
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Hilt compiler with KSP (NOT kapt!)
+    ksp(libs.hilt.compiler)
+
+    // Hilt Navigation Compose
+    implementation(libs.androidx.hilt.navigation)
+
 
     // Testing
     testImplementation(libs.junit)
