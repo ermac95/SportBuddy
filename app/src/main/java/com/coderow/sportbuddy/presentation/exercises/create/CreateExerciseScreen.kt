@@ -37,8 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import com.coderow.sportbuddy.R
 import com.coderow.sportbuddy.core.presentation.cardShape
 import com.coderow.sportbuddy.core.presentation.roundButtonShape
@@ -52,12 +50,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.coderow.sportbuddy.core.utils.observe
+import com.coderow.sportbuddy.domain.MuscleGroupType
 import com.coderow.sportbuddy.presentation.exercises.create.model.CreateExerciseCommand
 import com.coderow.sportbuddy.presentation.exercises.create.model.ExerciseInventoryType
 import com.coderow.sportbuddy.presentation.exercises.create.model.InventoryItem
 import com.coderow.sportbuddy.presentation.exercises.create.model.MuscleGroupItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 
 @Composable
 internal fun CreateExerciseScreen(
@@ -68,7 +69,6 @@ internal fun CreateExerciseScreen(
     val exerciseName by viewModel.exerciseName.collectAsStateWithLifecycle()
     val muscleGroupSet by viewModel.muscleGroupsFlow.collectAsStateWithLifecycle()
     val inventoryItems by viewModel.inventoryItemsFlow.collectAsStateWithLifecycle()
-    val inventoryWeight by viewModel.inventoryWeight.collectAsStateWithLifecycle()
     val isSaveButtonEnabled by viewModel.isSaveButtonEnabled.collectAsStateWithLifecycle()
 
     viewModel.commandFlow.observe { command ->
@@ -77,11 +77,40 @@ internal fun CreateExerciseScreen(
         }
     }
 
+    CreateExerciseContent(
+        exerciseName = exerciseName,
+        muscleGroupSet = muscleGroupSet,
+        inventoryItems = inventoryItems,
+        isSaveButtonEnabled = isSaveButtonEnabled,
+        onBackButtonClick = { navController.popBackStack() },
+        onNameInput = { viewModel.updateExerciseName(it) },
+        onMuscleGroupClick = { group, isSelected ->
+            viewModel.updateMuscleGroupSelected(group, isSelected)
+        },
+        onInventoryTypeClick = { item ->
+            viewModel.updateInventoryTypeSelected(item)
+        },
+        onSaveExerciseClick = { viewModel.onSaveExerciseClick() },
+    )
+}
+
+@Composable
+private fun CreateExerciseContent(
+    exerciseName: String,
+    muscleGroupSet: ImmutableSet<MuscleGroupItem>,
+    inventoryItems: ImmutableList<InventoryItem>,
+    isSaveButtonEnabled: Boolean,
+    onBackButtonClick: () -> Unit,
+    onNameInput: (String) -> Unit,
+    onMuscleGroupClick: (group: MuscleGroupItem, isSelected: Boolean) -> Unit,
+    onInventoryTypeClick: (InventoryItem) -> Unit,
+    onSaveExerciseClick: () -> Unit,
+) {
     Scaffold(
         topBar = {
             ScreenTopAppBar(
                 title = stringResource(R.string.create_exercise_title),
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { onBackButtonClick() }
             )
         }
     ) { innerPadding ->
@@ -103,7 +132,7 @@ internal fun CreateExerciseScreen(
                 ) {
                     ExerciseDescriptionBlock(
                         name = exerciseName,
-                        onNameInput = { viewModel.updateExerciseName(it) }
+                        onNameInput = { onNameInput(it) }
                     )
                 }
 
@@ -113,7 +142,7 @@ internal fun CreateExerciseScreen(
                     MuscleGroupsBlock(
                         muscleGroupSet = muscleGroupSet,
                         onMuscleGroupClick = { group, isSelected ->
-                            viewModel.updateMuscleGroupSelected(group, isSelected)
+                            onMuscleGroupClick(group, isSelected)
                         }
                     )
                 }
@@ -124,17 +153,8 @@ internal fun CreateExerciseScreen(
                     InventoryBlock(
                         inventoryItems = inventoryItems,
                         onItemClick = { item ->
-                            viewModel.updateInventoryTypeSelected(item)
+                            onInventoryTypeClick(item)
                         }
-                    )
-                }
-
-                item(
-                    key = "inventoryWeight"
-                ) {
-                    InventoryWeightBlock(
-                        weight = inventoryWeight,
-                        onWeightInput = { viewModel.updateInventoryWeight(it) }
                     )
                 }
             }
@@ -157,7 +177,7 @@ internal fun CreateExerciseScreen(
                     )
                     .padding(16.dp)
                     .clickableWithDebounceAndSoundEffect(enabled = isSaveButtonEnabled) {
-                        viewModel.onSaveExerciseClick()
+                        onSaveExerciseClick()
                     },
                 style = typography.titleLarge,
                 text = stringResource(R.string.save_button),
@@ -203,7 +223,7 @@ private fun ExerciseDescriptionBlock(
 @Composable
 private fun MuscleGroupsBlock(
     muscleGroupSet: ImmutableSet<MuscleGroupItem>,
-    onMuscleGroupClick: (groud: MuscleGroupItem, isSelected: Boolean) -> Unit,
+    onMuscleGroupClick: (group: MuscleGroupItem, isSelected: Boolean) -> Unit,
 ) {
     Column {
         Text(
@@ -337,44 +357,30 @@ private fun InventoryCard(
     }
 }
 
-@Composable
-private fun InventoryWeightBlock(
-    weight: String,
-    onWeightInput: (String) -> Unit,
-) {
-    Column {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(),
-            style = typography.headlineSmall,
-            text = stringResource(R.string.exercise_weight_text),
-            color = Color.Black,
-        )
-
-        OutlinedTextField(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .fillMaxWidth(),
-            value = weight,
-            onValueChange = { onWeightInput(it) },
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.exercise_weight_hint),
-                    style = typography.titleMedium,
-                )
-            },
-            singleLine = true,
-            shape = cardShape
-        )
-    }
-}
-
 @PreviewLightDark
 @Composable
 fun MainScreenPreview() {
     SportBuddyTheme {
-        CreateExerciseScreen(
-            navController = rememberNavController()
+        CreateExerciseContent(
+            exerciseName = "",
+            muscleGroupSet = MuscleGroupType.entries.map { muscleGroup ->
+                MuscleGroupItem(
+                    muscleGroup = muscleGroup,
+                    isSelected = false,
+                )
+            }.toPersistentSet(),
+            inventoryItems = ExerciseInventoryType.entries.map { inventoryType ->
+                InventoryItem(
+                    type = inventoryType,
+                    isSelected = false,
+                )
+            }.toPersistentList(),
+            isSaveButtonEnabled = true,
+            onBackButtonClick = {},
+            onNameInput = {},
+            onMuscleGroupClick = { _, _ -> },
+            onInventoryTypeClick = {},
+            onSaveExerciseClick = {},
         )
     }
 }

@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.coderow.sportbuddy.presentation.exercises.create.CreateExerciseScreen
+import com.coderow.sportbuddy.presentation.exercises.list.ExercisesListScreen
 import com.coderow.sportbuddy.presentation.mainscreen.MainMenuScreen
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
                                         MainMenuItemType.CREATE_EXERCISE -> {
                                             navController.navigate(CreateExercise)
                                         }
+                                        MainMenuItemType.EXERCISES_LIST -> {
+                                            navController.navigate(ExercisesList)
+                                        }
                                         else -> Unit
                                     }
                                 }
@@ -47,6 +51,10 @@ class MainActivity : ComponentActivity() {
 
                         composable<CreateExercise> {
                             CreateExerciseScreen(navController)
+                        }
+
+                        composable<ExercisesList> {
+                            ExercisesListScreen(navController)
                         }
                     }
                 }
@@ -60,3 +68,6 @@ object MainScreen
 
 @Serializable
 object CreateExercise
+
+@Serializable
+object ExercisesList

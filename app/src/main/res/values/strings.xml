@@ -10,7 +10,9 @@
 
     <string name="exercise_description" translatable="false">Описание</string>
     <string name="exercise_name_text" translatable="false">Название упражнения</string>
+    <string name="exercise_title" translatable="false">Название: </string>
     <string name="exercise_muscles_involved" translatable="false">Выберите группы мышц</string>
+    <string name="exercise_muscles_title" translatable="false">Группы мышц: </string>
     <string name="exercise_inventory" translatable="false">Тип снаряда</string>
     <string name="exercise_weight_text" translatable="false">Вес инвентаря</string>
     <string name="exercise_weight_hint" translatable="false">Укажите вес в кг</string>

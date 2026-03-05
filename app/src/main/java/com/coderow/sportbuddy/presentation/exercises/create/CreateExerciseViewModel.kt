@@ -37,9 +37,6 @@ internal class CreateExerciseViewModel @Inject constructor(
     private val _exerciseName = MutableStateFlow("")
     val exerciseName: StateFlow<String> = _exerciseName.asStateFlow()
 
-    private val _inventoryWeight = MutableStateFlow("")
-    val inventoryWeight: StateFlow<String> = _inventoryWeight.asStateFlow()
-
     private val _inventoryItemsFlow = MutableStateFlow(initialInventoryItems())
     val inventoryItemsFlow: StateFlow<ImmutableList<InventoryItem>> = _inventoryItemsFlow.asStateFlow()
 
@@ -67,13 +64,6 @@ internal class CreateExerciseViewModel @Inject constructor(
     fun updateExerciseName(newName: String) {
         viewModelScope.launch {
             _exerciseName.update { newName }
-            updateSaveButtonState()
-        }
-    }
-
-    fun updateInventoryWeight(weight: String) {
-        viewModelScope.launch {
-            _inventoryWeight.update { weight }
             updateSaveButtonState()
         }
     }
@@ -111,7 +101,6 @@ internal class CreateExerciseViewModel @Inject constructor(
     private fun isSaveButtonEnabled(): Boolean {
         val muscleGroups = muscleGroupsFlow.value.map { it.muscleGroup }.toSet()
         val inventoryType = inventoryItemsFlow.value.firstOrNull { it.isSelected }?.type
-        val inventoryWeight = inventoryWeight.value
         val exerciseName = exerciseName.value
 
         return muscleGroups.isNotEmpty()
@@ -121,20 +110,15 @@ internal class CreateExerciseViewModel @Inject constructor(
 
     fun onSaveExerciseClick() {
         viewModelScope.launch {
-            val muscleGroups = muscleGroupsFlow.value.map { it.muscleGroup }.toSet()
+            val muscleGroups = muscleGroupsFlow.value.filter { it.isSelected }.map { it.muscleGroup }.toSet()
             val inventoryType = inventoryItemsFlow.value.firstOrNull { it.isSelected }?.type
-            val inventoryWeight = if (inventoryWeight.value.isNotBlank()) {
-                inventoryWeight.value.toDouble()
-            } else {
-                null
-            }
 
             val exercise = Exercise(
                 id = UUID.randomUUID().toString(),
                 name = exerciseName.value,
                 muscleGroups = muscleGroups,
                 inventoryType = inventoryType,
-                inventoryWeight = inventoryWeight,
+                inventoryWeight = null,
             )
 
             exerciseRepository.insertExercise(exercise)
