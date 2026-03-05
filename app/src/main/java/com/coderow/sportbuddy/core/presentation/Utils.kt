@@ -13,3 +13,4 @@ fun ViewModel.createViewModelScope() = CoroutineExceptionHandlerHolder.uncaughtE
 } ?: viewModelScope
 
 internal val cardShape = RoundedCornerShape(12.dp)
+internal val roundButtonShape = RoundedCornerShape(24.dp)

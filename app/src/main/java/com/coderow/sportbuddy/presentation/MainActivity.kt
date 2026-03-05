@@ -7,14 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.coderow.sportbuddy.presentation.exercises.create.CreateExerciseScreen
 import com.coderow.sportbuddy.presentation.mainscreen.MainMenuScreen
+import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
@@ -34,7 +33,20 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable<MainScreen> {
-                            MainMenuScreen()
+                            MainMenuScreen(
+                                onMenuItemClick = { type ->
+                                    when (type) {
+                                        MainMenuItemType.CREATE_EXERCISE -> {
+                                            navController.navigate(CreateExercise)
+                                        }
+                                        else -> Unit
+                                    }
+                                }
+                            )
+                        }
+
+                        composable<CreateExercise> {
+                            CreateExerciseScreen(navController)
                         }
                     }
                 }
@@ -45,3 +57,6 @@ class MainActivity : ComponentActivity() {
 
 @Serializable
 object MainScreen
+
+@Serializable
+object CreateExercise

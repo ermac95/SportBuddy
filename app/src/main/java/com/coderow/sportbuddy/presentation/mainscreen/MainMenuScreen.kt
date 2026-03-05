@@ -32,12 +32,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.coderow.sportbuddy.R
 import com.coderow.sportbuddy.core.presentation.cardShape
+import com.coderow.sportbuddy.core.utils.clickableWithDebounceAndSoundEffect
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.LightPurple
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
 
 @Composable
-fun MainMenuScreen() {
+fun MainMenuScreen(
+    onMenuItemClick: (MainMenuItemType) -> Unit,
+) {
     val gridState = rememberLazyGridState()
     val viewModel = viewModel<MainScreenViewModel>()
     val menuItems by viewModel.menuItemsFlow.collectAsStateWithLifecycle()
@@ -69,7 +72,10 @@ fun MainMenuScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(items = menuItems) { item ->
-                    MenuItem(item.itemType)
+                    MenuItem(
+                        type = item.itemType,
+                        onMenuItemClick = onMenuItemClick,
+                    )
                 }
             }
         }
@@ -79,6 +85,7 @@ fun MainMenuScreen() {
 @Composable
 private fun MenuItem(
     type: MainMenuItemType,
+    onMenuItemClick: (MainMenuItemType) -> Unit,
 ) {
     val title = when (type) {
         MainMenuItemType.CREATE_EXERCISE -> stringResource(R.string.create_exercise_title)
@@ -105,7 +112,10 @@ private fun MenuItem(
             .border(
                 border = BorderStroke(4.dp, borderColor),
                 shape = cardShape
-            ),
+            )
+            .clickableWithDebounceAndSoundEffect {
+                onMenuItemClick(type)
+            },
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -132,6 +142,8 @@ private fun MenuItem(
 @Composable
 fun MainScreenPreview() {
     SportBuddyTheme {
-        MainMenuScreen()
+        MainMenuScreen(
+            onMenuItemClick = {}
+        )
     }
 }

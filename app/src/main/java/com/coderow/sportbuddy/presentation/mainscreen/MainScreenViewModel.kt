@@ -3,14 +3,17 @@ package com.coderow.sportbuddy.presentation.mainscreen
 import com.coderow.sportbuddy.core.presentation.BaseViewModel
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItem
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class MainScreenViewModel : BaseViewModel() {
+@HiltViewModel
+class MainScreenViewModel @Inject constructor(): BaseViewModel() {
 
     val menuItemsFlow: StateFlow<ImmutableList<MainMenuItem>> = flow {
         val menuList = persistentListOf(
