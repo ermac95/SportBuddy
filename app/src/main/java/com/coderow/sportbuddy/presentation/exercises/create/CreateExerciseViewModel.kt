@@ -118,7 +118,6 @@ internal class CreateExerciseViewModel @Inject constructor(
                 name = exerciseName.value,
                 muscleGroups = muscleGroups,
                 inventoryType = inventoryType,
-                inventoryWeight = null,
             )
 
             exerciseRepository.insertExercise(exercise)

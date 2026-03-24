@@ -10,5 +10,4 @@ data class Exercise(
     val name: String,
     val muscleGroups: Set<MuscleGroupType>,
     val inventoryType: ExerciseInventoryType?,
-    val inventoryWeight: Double?,
 )

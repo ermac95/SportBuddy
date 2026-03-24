@@ -32,6 +32,5 @@ class ExercisesListViewModel @Inject constructor(
             name = name,
             muscleGroups = muscleGroups.joinToString(", ") { it.value },
             inventoryType = inventoryType ?: ExerciseInventoryType.SELF_WEIGHT,
-            inventoryWeight = inventoryWeight.toString(),
         )
 }

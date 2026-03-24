@@ -9,5 +9,4 @@ data class ExerciseListItem(
     val name: String,
     val muscleGroups: String,
     val inventoryType: ExerciseInventoryType,
-    val inventoryWeight: String?,
 )

@@ -16,7 +16,6 @@ data class ExerciseEntity(
     val name: String,
     val muscleGroups: Set<MuscleGroupType>,
     val inventoryType: ExerciseInventoryType?,
-    val inventoryWeight: Double?,
 ) {
     // Convert to domain model
     fun toDomain(): Exercise = Exercise(
@@ -24,7 +23,6 @@ data class ExerciseEntity(
         name = name,
         muscleGroups = muscleGroups,
         inventoryType = inventoryType,
-        inventoryWeight = inventoryWeight
     )
 
     companion object {
@@ -34,7 +32,6 @@ data class ExerciseEntity(
             name = exercise.name,
             muscleGroups = exercise.muscleGroups,
             inventoryType = exercise.inventoryType,
-            inventoryWeight = exercise.inventoryWeight
         )
     }
 }

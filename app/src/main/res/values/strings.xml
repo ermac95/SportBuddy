@@ -16,5 +16,16 @@
     <string name="exercise_inventory" translatable="false">Тип снаряда</string>
     <string name="exercise_weight_text" translatable="false">Вес инвентаря</string>
     <string name="exercise_weight_hint" translatable="false">Укажите вес в кг</string>
+
+    <string name="exercise_add_number" translatable="false">Упражнение № %1$s</string>
+    <string name="exercise_add_title" translatable="false">Добавить упражнение</string>
+    <string name="exercise_select_title" translatable="false">Выбрать упражнение</string>
+    <string name="exercise_select_from_list_title" translatable="false">Выберите упражнение из списка</string>
+    <string name="exercise_repetition_interval" translatable="false">Интервал между подходами</string>
+    <string name="interval_between_exercises_title" translatable="false">Выберите интервал между упражнениями</string>
+    <string name="exercise_repetition_interval_select" translatable="false">Выбрать интервал</string>
     <string name="save_button" translatable="false">Сохранить</string>
+
+    <string name="workout_name" translatable="false">Название тренировки</string>
+    <string name="workout_name_hint" translatable="false">Введите название тренировки</string>
 </resources>

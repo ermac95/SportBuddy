@@ -165,13 +165,11 @@ fun MainScreenPreview() {
                     name = "Подьем гантели на бицепс",
                     muscleGroups = "Бицепс, Предплечье",
                     inventoryType = ExerciseInventoryType.DUMBBELL,
-                    inventoryWeight = "7,5 кг",
                 ),
                 ExerciseListItem(
                     name = "Тяга штанги к поясу",
                     muscleGroups = "Широчайшие мышцы, Спина, Предплечье",
                     inventoryType = ExerciseInventoryType.BARBELL,
-                    inventoryWeight = "7,5 кг",
                 )
             ),
             onBackButtonClick = {},

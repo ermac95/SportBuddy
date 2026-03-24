@@ -16,6 +16,7 @@ import com.coderow.sportbuddy.presentation.exercises.list.ExercisesListScreen
 import com.coderow.sportbuddy.presentation.mainscreen.MainMenuScreen
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
+import com.coderow.sportbuddy.presentation.workout.create.CreateWorkoutScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
@@ -43,6 +44,9 @@ class MainActivity : ComponentActivity() {
                                         MainMenuItemType.EXERCISES_LIST -> {
                                             navController.navigate(ExercisesList)
                                         }
+                                        MainMenuItemType.CREATE_TRAINING -> {
+                                            navController.navigate(CreateWorkout)
+                                        }
                                         else -> Unit
                                     }
                                 }
@@ -55,6 +59,10 @@ class MainActivity : ComponentActivity() {
 
                         composable<ExercisesList> {
                             ExercisesListScreen(navController)
+                        }
+
+                        composable<CreateWorkout> {
+                            CreateWorkoutScreen(navController)
                         }
                     }
                 }
@@ -71,3 +79,6 @@ object CreateExercise
 
 @Serializable
 object ExercisesList
+
+@Serializable
+object CreateWorkout
