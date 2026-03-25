@@ -1,7 +1,6 @@
-package com.coderow.sportbuddy.presentation.exercises.list
+package com.coderow.sportbuddy.presentation.workout.list
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,13 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -34,36 +33,48 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.coderow.sportbuddy.R
 import com.coderow.sportbuddy.core.presentation.cardShape
-import com.coderow.sportbuddy.presentation.exercises.create.model.ExerciseInventoryType
-import com.coderow.sportbuddy.presentation.exercises.list.model.ExerciseListItem
+import com.coderow.sportbuddy.core.utils.clickableWithDebounceAndSoundEffect
+import com.coderow.sportbuddy.core.utils.observe
+import com.coderow.sportbuddy.presentation.SelectedWorkout
 import com.coderow.sportbuddy.presentation.ui.compose.ScreenTopAppBar
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
+import com.coderow.sportbuddy.presentation.workout.list.model.ChooseWorkoutCommand
+import com.coderow.sportbuddy.presentation.workout.list.model.WorkoutListItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-//TODO в будущем здесь будет фильтрация по типу оборудования, группам мышц
 @Composable
-internal fun ExercisesListScreen(
+internal fun ChooseWorkoutScreen(
     navController: NavController,
-    viewModel: ExercisesListViewModel = hiltViewModel(),
+    viewModel: ChooseWorkoutViewModel = hiltViewModel()
 ) {
-    val exercisesItems by viewModel.exercisesListFlow.collectAsStateWithLifecycle()
+    val workoutsList by viewModel.workoutsListFlow.collectAsStateWithLifecycle()
 
-    ExercisesListContent(
-        items = exercisesItems,
+    viewModel.commandFlow.observe { command ->
+        when (command) {
+            is ChooseWorkoutCommand.OpenWorkout -> {
+                navController.navigate(SelectedWorkout(command.id))
+            }
+        }
+    }
+
+    ChooseWorkoutScreenContent(
+        items = workoutsList,
+        onItemClick = { workoutId -> viewModel.onWorkoutSelect(workoutId) },
         onBackButtonClick = { navController.popBackStack() }
     )
 }
 
 @Composable
-private fun ExercisesListContent(
-    items: ImmutableList<ExerciseListItem>,
+private fun ChooseWorkoutScreenContent(
+    items: ImmutableList<WorkoutListItem>,
+    onItemClick: (id: String) -> Unit,
     onBackButtonClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             ScreenTopAppBar(
-                title = stringResource(R.string.exercises_list_title),
+                title = stringResource(R.string.workouts_list_title),
                 onBackClick = { onBackButtonClick() }
             )
         }
@@ -81,8 +92,11 @@ private fun ExercisesListContent(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(items) { exercise ->
-                    ExerciseCard(exercise)
+                items(items) { workout ->
+                    WorkoutCard(
+                        item = workout,
+                        onItemClick = onItemClick,
+                    )
                 }
             }
         }
@@ -90,17 +104,11 @@ private fun ExercisesListContent(
 }
 
 @Composable
-private fun ExerciseCard(
-    item: ExerciseListItem
+private fun WorkoutCard(
+    item: WorkoutListItem,
+    onItemClick: (id: String) -> Unit,
 ) {
     val borderColor = Color.DarkGray
-
-    val iconRes = when (item.inventoryType) {
-        ExerciseInventoryType.DUMBBELL -> R.drawable.dumbbell_inventory
-        ExerciseInventoryType.BARBELL -> R.drawable.barbell
-        ExerciseInventoryType.HORIZONTAL_BAR -> R.drawable.horizontal_bar
-        ExerciseInventoryType.SELF_WEIGHT -> R.drawable.sportsman
-    }
 
     Box(
         modifier = Modifier
@@ -109,36 +117,46 @@ private fun ExerciseCard(
             .border(
                 border = BorderStroke(4.dp, borderColor),
                 shape = cardShape
-            ),
+            )
+            .clickableWithDebounceAndSoundEffect {
+                onItemClick(item.id)
+            },
         contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.Start,
         ) {
-            Image(
-                modifier = Modifier.size(40.dp, 40.dp),
-                painter = painterResource(iconRes),
-                contentDescription = null
+            // Название тренировки
+            Text(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
+                text = item.name,
+                textAlign = TextAlign.Center,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+                style = typography.titleLarge
             )
 
+            // Список упражнений
             FlowRow(
-                modifier = Modifier.padding(top = 8.dp),
-               horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.exercise_title),
+                    text = stringResource(R.string.exercises_point_title),
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = item.name,
+                    text = item.exercises,
                     color = Color.Black,
                 )
             }
 
+            // Группы мышц
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -158,21 +176,24 @@ private fun ExerciseCard(
 
 @PreviewLightDark
 @Composable
-fun ExercisesListScreenPreview() {
+fun ChooseWorkoutScreenPreview() {
     SportBuddyTheme {
-        ExercisesListContent(
+        ChooseWorkoutScreenContent(
             items = persistentListOf(
-                ExerciseListItem(
-                    name = "Подьем гантели на бицепс",
-                    muscleGroups = "Бицепс, Предплечье",
-                    inventoryType = ExerciseInventoryType.DUMBBELL,
+                WorkoutListItem(
+                    id = "12312",
+                    name = "Грудь + трицепс",
+                    muscleGroups = "Грудь, Трицепс, Предплечье",
+                    exercises = "Тяга штанги к поясу, "
                 ),
-                ExerciseListItem(
-                    name = "Тяга штанги к поясу",
+                WorkoutListItem(
+                    id = "123132",
+                    name = "Спина + бицепс",
                     muscleGroups = "Широчайшие мышцы, Спина, Предплечье",
-                    inventoryType = ExerciseInventoryType.BARBELL,
+                    exercises = "Тяга штанги к поясу, Подтягивания широким хватом, Подъем гантели на бицепс (обычный), Подъем гантели молот"
                 )
             ),
+            onItemClick = {},
             onBackButtonClick = {},
         )
     }

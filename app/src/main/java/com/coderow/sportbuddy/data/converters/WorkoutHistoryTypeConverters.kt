@@ -3,13 +3,13 @@ package com.coderow.sportbuddy.data.converters
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.coderow.sportbuddy.domain.TimeInterval
-import com.coderow.sportbuddy.domain.WorkoutExerciseTemplate
+import com.coderow.sportbuddy.domain.WorkoutExerciseHistoryTemplate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @ProvidedTypeConverter
-class WorkoutTypeConverters @Inject constructor() {
+class WorkoutHistoryTypeConverters @Inject constructor() {
 
     private val json: Json = Json {
         ignoreUnknownKeys = true
@@ -17,22 +17,12 @@ class WorkoutTypeConverters @Inject constructor() {
     }
 
     @TypeConverter
-    fun fromTimeInterval(interval: TimeInterval): String {
-        return json.encodeToString(interval)
-    }
-
-    @TypeConverter
-    fun toTimeInterval(data: String): TimeInterval {
-        return json.decodeFromString(data)
-    }
-
-    @TypeConverter
-    fun fromWorkoutExerciseList(exercises: List<WorkoutExerciseTemplate>): String {
+    fun fromWorkoutExerciseList(exercises: List<WorkoutExerciseHistoryTemplate>): String {
         return json.encodeToString(exercises)
     }
 
     @TypeConverter
-    fun toWorkoutExerciseList(data: String): List<WorkoutExerciseTemplate> {
+    fun toWorkoutExerciseList(data: String): List<WorkoutExerciseHistoryTemplate> {
         return json.decodeFromString(data)
     }
 }

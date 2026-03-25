@@ -7,10 +7,11 @@ import kotlinx.serialization.Serializable
  * Модель шаблона упражнения для привязки к тренировке
  */
 @Serializable
-data class WorkoutExercise(
+data class WorkoutExerciseTemplate(
     val id: String,
     val name: String?,
     val muscleGroups: Set<MuscleGroupType>,
     val inventoryType: ExerciseInventoryType?,
-    val repetitionsInterval: TimeInterval?,
+    val setsNumber: Int?,
+    val setsInterval: TimeInterval?,
 )

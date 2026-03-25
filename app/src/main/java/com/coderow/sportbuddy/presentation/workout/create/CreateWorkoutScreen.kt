@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
@@ -44,7 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -56,18 +60,20 @@ import com.coderow.sportbuddy.R
 import com.coderow.sportbuddy.core.presentation.cardShape
 import com.coderow.sportbuddy.core.presentation.roundButtonShape
 import com.coderow.sportbuddy.core.utils.clickableWithDebounceAndSoundEffect
+import com.coderow.sportbuddy.core.utils.observe
 import com.coderow.sportbuddy.domain.Exercise
 import com.coderow.sportbuddy.domain.TimeInterval
-import com.coderow.sportbuddy.domain.WorkoutExercise
+import com.coderow.sportbuddy.domain.WorkoutExerciseTemplate
 import com.coderow.sportbuddy.presentation.ui.compose.ScreenTopAppBar
 import com.coderow.sportbuddy.presentation.ui.theme.LightPurple
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
+import com.coderow.sportbuddy.presentation.workout.create.model.CreateWorkoutCommand
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun CreateWorkoutScreen(
+internal fun CreateWorkoutScreen(
     navController: NavController,
     viewModel: CreateWorkoutViewModel = hiltViewModel()
 ) {
@@ -75,15 +81,23 @@ fun CreateWorkoutScreen(
     val exercisesList by viewModel.availableExercises.collectAsStateWithLifecycle()
     val addedExercises by viewModel.addedExercises.collectAsStateWithLifecycle()
 
+    val repetitionNumbers by viewModel.repetitionNumbersFlow.collectAsStateWithLifecycle()
     val availableIntervals by viewModel.availableIntervals.collectAsStateWithLifecycle()
     val intervalBetweenExercises by viewModel.intervalBetweenExercises.collectAsStateWithLifecycle()
     val isSaveButtonEnabled by viewModel.isSaveButtonEnabled.collectAsStateWithLifecycle()
+
+    viewModel.commandFlow.observe { command ->
+        when (command) {
+            is CreateWorkoutCommand.ExitScreen -> navController.popBackStack()
+        }
+    }
 
     CreateWorkoutScreenContent(
         workoutName = workoutName,
         onWorkoutNameChange = { viewModel.onWorkoutNameChange(it) },
         exercisesList = exercisesList,
         addedExercises = addedExercises,
+        availableRepetitionNumbers = repetitionNumbers,
         availableIntervals = availableIntervals,
         intervalBetweenExercises = intervalBetweenExercises,
         isSaveButtonEnabled = isSaveButtonEnabled,
@@ -95,6 +109,9 @@ fun CreateWorkoutScreen(
         },
         onExerciseIntervalSelect = { templateId, interval ->
             viewModel.onSelectRepetitionInterval(templateId, interval)
+        },
+        onRepetitionNumberSelect = { templateId, number ->
+            viewModel.onSelectRepetitionNumber(templateId, number)
         },
         onIntervalBetweenExerciseSelect = {
             viewModel.onSelectIntervalBetweenExercises(it)
@@ -110,18 +127,22 @@ private fun CreateWorkoutScreenContent(
     workoutName: String,
     onWorkoutNameChange: (String) -> Unit,
     exercisesList: ImmutableList<Exercise>,
-    addedExercises: ImmutableList<WorkoutExercise>,
+    addedExercises: ImmutableList<WorkoutExerciseTemplate>,
+    availableRepetitionNumbers: ImmutableList<Int>,
     availableIntervals: ImmutableList<TimeInterval>,
     intervalBetweenExercises: TimeInterval?,
     isSaveButtonEnabled: Boolean,
     onAddExerciseClick: () -> Unit,
     onDeleteExerciseClick: (String) -> Unit,
     onSelectExerciseClick: (templateId: String, selectedItemId: String) -> Unit,
+    onRepetitionNumberSelect: (templateId: String, number: Int) -> Unit,
     onExerciseIntervalSelect: (templateId: String, interval: TimeInterval) -> Unit,
     onIntervalBetweenExerciseSelect: (interval: TimeInterval) -> Unit,
     onBackButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Scaffold(
         topBar = {
             ScreenTopAppBar(
@@ -153,7 +174,16 @@ private fun CreateWorkoutScreenContent(
                         placeholder = { Text(stringResource(R.string.workout_name_hint)) },
                         modifier = Modifier
                             .fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                keyboardController?.hide()
+                            }
+                        ),
+                        singleLine = true
                     )
                 }
 
@@ -181,8 +211,10 @@ private fun CreateWorkoutScreenContent(
                         number = index + 1,
                         exerciseTemplate = exerciseTemplate,
                         availableExercises = exercisesList,
+                        availableRepetitionNumbers = availableRepetitionNumbers,
                         availableIntervals = availableIntervals,
                         onSelectExerciseClick = onSelectExerciseClick,
+                        onRepetitionNumberSelect = onRepetitionNumberSelect,
                         onTimeIntervalSelect = onExerciseIntervalSelect,
                         onDeleteClick = onDeleteExerciseClick,
                     )
@@ -229,10 +261,12 @@ private fun CreateWorkoutScreenContent(
 @Composable
 private fun ExerciseTemplateItem(
     number: Int,
-    exerciseTemplate: WorkoutExercise,
+    exerciseTemplate: WorkoutExerciseTemplate,
     availableExercises: ImmutableList<Exercise>,
+    availableRepetitionNumbers: ImmutableList<Int>,
     availableIntervals: ImmutableList<TimeInterval>,
     onSelectExerciseClick: (templateId: String, selectedItemId: String) -> Unit,
+    onRepetitionNumberSelect: (templateId: String, number: Int) -> Unit,
     onTimeIntervalSelect: (templateId: String, interval: TimeInterval) -> Unit,
     onDeleteClick: (String) -> Unit,
 ) {
@@ -291,21 +325,98 @@ private fun ExerciseTemplateItem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Выбор количества подходов
+            Text(
+                text = stringResource(R.string.exercise_repetition_number_hint),
+                style = typography.labelMedium,
+            )
+
+            RepetitionsNumberField(
+                selectedValue = exerciseTemplate.setsNumber,
+                availableItems = availableRepetitionNumbers,
+                onValueChange = { selectedNumber ->
+                    onRepetitionNumberSelect(exerciseTemplate.id, selectedNumber)
+                }
+            )
+
             // Выбор интервала между подходами
             Text(
                 text = stringResource(R.string.exercise_repetition_interval),
                 style = typography.labelMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
             )
 
             TimeSelectorField(
-                selectedValue = exerciseTemplate.repetitionsInterval,
+                selectedValue = exerciseTemplate.setsInterval,
                 onValueChange = { selectedInterval ->
                     onTimeIntervalSelect(exerciseTemplate.id, selectedInterval)
                 },
                 availableIntervals = availableIntervals,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RepetitionsNumberField(
+    selectedValue: Int?,
+    availableItems: ImmutableList<Int>,
+    onValueChange: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        modifier = Modifier
+            .background(
+                shape = cardShape,
+                color = Color.Transparent
+            )
+            .fillMaxWidth(),
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .menuAnchor(PrimaryNotEditable, true)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = selectedValue?.toString() ?: stringResource(R.string.exercise_repetition_number_hint),
+                    fontSize = 18.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        }
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            availableItems.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item.toString()) },
+                    onClick = {
+                        onValueChange(item)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
@@ -486,14 +597,16 @@ fun CreateWorkoutPreview() {
             onWorkoutNameChange = {},
             exercisesList = persistentListOf(),
             addedExercises = persistentListOf(
-                WorkoutExercise(
+                WorkoutExerciseTemplate(
                     id = "1",
                     name = null,
                     muscleGroups = emptySet(),
                     inventoryType = null,
-                    repetitionsInterval = null,
+                    setsNumber = null,
+                    setsInterval = null,
                 )
             ),
+            availableRepetitionNumbers = persistentListOf(1, 2, 3, 4, 5),
             availableIntervals = persistentListOf(
                 TimeInterval(
                     title = "30 сек",
@@ -514,6 +627,7 @@ fun CreateWorkoutPreview() {
             onDeleteExerciseClick = {},
             onSelectExerciseClick = { _, _ -> },
             onExerciseIntervalSelect = { _, _ -> },
+            onRepetitionNumberSelect = { _, _ -> },
             onIntervalBetweenExerciseSelect = {},
             onBackButtonClick = {},
             onSaveButtonClick = {},

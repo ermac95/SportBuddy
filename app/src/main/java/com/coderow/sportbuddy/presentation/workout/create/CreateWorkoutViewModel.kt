@@ -1,11 +1,14 @@
 package com.coderow.sportbuddy.presentation.workout.create
 
 import com.coderow.sportbuddy.core.presentation.BaseViewModel
+import com.coderow.sportbuddy.core.utils.CommandFlow
+import com.coderow.sportbuddy.core.utils.emit
 import com.coderow.sportbuddy.data.repository.ExerciseRepository
 import com.coderow.sportbuddy.data.repository.WorkoutRepository
 import com.coderow.sportbuddy.domain.TimeInterval
-import com.coderow.sportbuddy.domain.WorkoutExercise
+import com.coderow.sportbuddy.domain.WorkoutExerciseTemplate
 import com.coderow.sportbuddy.domain.WorkoutTemplate
+import com.coderow.sportbuddy.presentation.workout.create.model.CreateWorkoutCommand
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -24,10 +27,12 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
-class CreateWorkoutViewModel @Inject constructor(
+internal class CreateWorkoutViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     exerciseRepository: ExerciseRepository,
 ) : BaseViewModel() {
+
+    val commandFlow = CommandFlow<CreateWorkoutCommand>(viewModelScope)
 
     private val _workoutName = MutableStateFlow("")
     val workoutName = _workoutName.asStateFlow()
@@ -35,7 +40,7 @@ class CreateWorkoutViewModel @Inject constructor(
     private val _intervalBetweenExercises = MutableStateFlow<TimeInterval?>(null)
     val intervalBetweenExercises: StateFlow<TimeInterval?> = _intervalBetweenExercises.asStateFlow()
 
-    private val _addedExercises = MutableStateFlow(persistentListOf<WorkoutExercise>())
+    private val _addedExercises = MutableStateFlow(persistentListOf<WorkoutExerciseTemplate>())
     val addedExercises = _addedExercises.stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
 
     val availableExercises = exerciseRepository.observeAllExercises().map { it.toPersistentList() }
@@ -48,6 +53,10 @@ class CreateWorkoutViewModel @Inject constructor(
     ) { name, interval, exercises ->
         name.isNotBlank() && interval != null && exercises.isNotEmpty()
     }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val repetitionNumbersFlow = flowOf(
+        persistentListOf(1, 2, 3, 4, 5)
+    ).stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
 
     val availableIntervals = flowOf(
         persistentListOf(
@@ -75,12 +84,13 @@ class CreateWorkoutViewModel @Inject constructor(
     ).stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
 
     fun onAddExerciseClick() {
-        val newExercise = WorkoutExercise(
+        val newExercise = WorkoutExerciseTemplate(
             id = UUID.randomUUID().toString(),
             name = null,
             muscleGroups = emptySet(),
             inventoryType = null,
-            repetitionsInterval = null,
+            setsNumber = null,
+            setsInterval = null,
         )
 
         _addedExercises.update { it.add(newExercise) }
@@ -120,7 +130,7 @@ class CreateWorkoutViewModel @Inject constructor(
             exercises.map { templateExercise ->
                 if (templateExercise.id == templateId) {
                     templateExercise.copy(
-                        repetitionsInterval = interval,
+                        setsInterval = interval,
                     )
                 } else {
                     templateExercise
@@ -133,6 +143,23 @@ class CreateWorkoutViewModel @Inject constructor(
         _workoutName.value = name
     }
 
+    fun onSelectRepetitionNumber(
+        templateId: String,
+        number: Int,
+    ) {
+        _addedExercises.update { exercises ->
+            exercises.map { templateExercise ->
+                if (templateExercise.id == templateId) {
+                    templateExercise.copy(
+                        setsNumber = number,
+                    )
+                } else {
+                    templateExercise
+                }
+            }.toPersistentList()
+        }
+    }
+
     fun onSelectIntervalBetweenExercises(
         interval: TimeInterval,
     ) {
@@ -140,16 +167,17 @@ class CreateWorkoutViewModel @Inject constructor(
     }
 
     fun saveWorkout() {
-        val intervalBetweenExercises = intervalBetweenExercises.value ?: return
-
-        val workoutTemplate = WorkoutTemplate(
-            name = workoutName.value,
-            intervalBetweenExercises = intervalBetweenExercises,
-            exercisesList = addedExercises.value
-        )
-
         viewModelScope.launch {
+            val intervalBetweenExercises = intervalBetweenExercises.value ?: return@launch
+
+            val workoutTemplate = WorkoutTemplate(
+                name = workoutName.value,
+                intervalBetweenExercises = intervalBetweenExercises,
+                exercisesList = addedExercises.value
+            )
+
             workoutRepository.insertWorkout(workoutTemplate)
+            commandFlow emit CreateWorkoutCommand.ExitScreen
         }
     }
 }

@@ -17,6 +17,9 @@ import com.coderow.sportbuddy.presentation.mainscreen.MainMenuScreen
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
 import com.coderow.sportbuddy.presentation.workout.create.CreateWorkoutScreen
+import com.coderow.sportbuddy.presentation.workout.history.HistoryWorkoutScreen
+import com.coderow.sportbuddy.presentation.workout.list.ChooseWorkoutScreen
+import com.coderow.sportbuddy.presentation.workout.start.SelectedWorkoutScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
@@ -47,6 +50,12 @@ class MainActivity : ComponentActivity() {
                                         MainMenuItemType.CREATE_TRAINING -> {
                                             navController.navigate(CreateWorkout)
                                         }
+                                        MainMenuItemType.START_TRAINING -> {
+                                            navController.navigate(ChooseWorkout)
+                                        }
+                                        MainMenuItemType.TRAINING_HISTORY -> {
+                                            navController.navigate(HistoryWorkout)
+                                        }
                                         else -> Unit
                                     }
                                 }
@@ -63,6 +72,20 @@ class MainActivity : ComponentActivity() {
 
                         composable<CreateWorkout> {
                             CreateWorkoutScreen(navController)
+                        }
+
+                        composable<ChooseWorkout> {
+                            ChooseWorkoutScreen(navController)
+                        }
+
+                        composable<SelectedWorkout> {
+                            SelectedWorkoutScreen(
+                                navController = navController,
+                            )
+                        }
+
+                        composable<HistoryWorkout> {
+                            HistoryWorkoutScreen(navController)
                         }
                     }
                 }
@@ -82,3 +105,12 @@ object ExercisesList
 
 @Serializable
 object CreateWorkout
+
+@Serializable
+object ChooseWorkout
+
+@Serializable
+data class SelectedWorkout(val workoutId: String)
+
+@Serializable
+object HistoryWorkout

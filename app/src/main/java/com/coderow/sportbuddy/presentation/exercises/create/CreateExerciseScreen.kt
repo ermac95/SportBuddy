@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
@@ -46,7 +49,9 @@ import com.coderow.sportbuddy.presentation.ui.theme.LightPurple
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.coderow.sportbuddy.core.utils.observe
@@ -193,6 +198,8 @@ private fun ExerciseDescriptionBlock(
     name: String,
     onNameInput: (String) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column {
         Text(
             modifier = Modifier
@@ -214,8 +221,16 @@ private fun ExerciseDescriptionBlock(
                     style = typography.titleMedium,
                 )
             },
-            singleLine = true,
-            shape = cardShape
+            shape = RoundedCornerShape(12.dp),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
+            singleLine = true
         )
     }
 }

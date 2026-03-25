@@ -6,6 +6,7 @@
     <string name="create_training_title" translatable="false">Создать тренировку</string>
     <string name="start_training_title" translatable="false">Начать тренировку</string>
     <string name="exercises_list_title" translatable="false">Список упражнений</string>
+    <string name="workouts_list_title" translatable="false">Список тренировок</string>
     <string name="training_history" translatable="false">История тренировок</string>
 
     <string name="exercise_description" translatable="false">Описание</string>
@@ -14,6 +15,7 @@
     <string name="exercise_muscles_involved" translatable="false">Выберите группы мышц</string>
     <string name="exercise_muscles_title" translatable="false">Группы мышц: </string>
     <string name="exercise_inventory" translatable="false">Тип снаряда</string>
+    <string name="exercise_inventory_title" translatable="false">Тип снаряда: </string>
     <string name="exercise_weight_text" translatable="false">Вес инвентаря</string>
     <string name="exercise_weight_hint" translatable="false">Укажите вес в кг</string>
 
@@ -22,10 +24,28 @@
     <string name="exercise_select_title" translatable="false">Выбрать упражнение</string>
     <string name="exercise_select_from_list_title" translatable="false">Выберите упражнение из списка</string>
     <string name="exercise_repetition_interval" translatable="false">Интервал между подходами</string>
+    <string name="exercise_repetition_interval_title" translatable="false">Интервал между подходами: </string>
     <string name="interval_between_exercises_title" translatable="false">Выберите интервал между упражнениями</string>
+    <string name="exercise_repetition_number_title" translatable="false">Количество подходов: </string>
+    <string name="exercise_repetition_number_hint" translatable="false">Количество подходов</string>
     <string name="exercise_repetition_interval_select" translatable="false">Выбрать интервал</string>
+    <string name="rest_button" translatable="false">Отдыхать</string>
+    <string name="complete_exercise_button" translatable="false">Закончить упражнение</string>
     <string name="save_button" translatable="false">Сохранить</string>
+    <string name="start_button" translatable="false">Начать</string>
+    <string name="workout_exit_button" translatable="false">Завершить</string>
 
     <string name="workout_name" translatable="false">Название тренировки</string>
     <string name="workout_name_hint" translatable="false">Введите название тренировки</string>
+    <string name="exercises_point_title" translatable="false">Список упражнений: </string>
+    <string name="workout_toolbar_title" translatable="false">Тренировка</string>
+    <string name="selected_workout_title" translatable="false">Тренировка: \n %1$s</string>
+    <string name="selected_exercise_title" translatable="false">Текущее упражнение: \n %1$s</string>
+    <string name="repetition_number_hint" translatable="false">Количество повторений</string>
+    <string name="repetition_number_point_title" translatable="false">Количество повторений:</string>
+    <string name="repetition_weight_point_title" translatable="false">Вес инвентаря:</string>
+    <string name="repetition_weight_kg_value" translatable="false">%1$s кг</string>
+
+    <string name="workout_completed_title" translatable="false">Тренировка \n\"%1$s\" завершена!</string>
+    <string name="exercise_rep_number" translatable="false">Подход №%1$s:</string>
 </resources>
