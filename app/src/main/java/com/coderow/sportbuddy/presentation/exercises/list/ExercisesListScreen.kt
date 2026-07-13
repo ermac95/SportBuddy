@@ -76,7 +76,6 @@ private fun ExercisesListContent(
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .padding(bottom = 100.dp)
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -166,6 +165,16 @@ fun ExercisesListScreenPreview() {
                     name = "Подьем гантели на бицепс",
                     muscleGroups = "Бицепс, Предплечье",
                     inventoryType = ExerciseInventoryType.DUMBBELL,
+                ),
+                ExerciseListItem(
+                    name = "Тяга штанги к поясу",
+                    muscleGroups = "Широчайшие мышцы, Спина, Предплечье",
+                    inventoryType = ExerciseInventoryType.BARBELL,
+                ),
+                ExerciseListItem(
+                    name = "Тяга штанги к поясу",
+                    muscleGroups = "Широчайшие мышцы, Спина, Предплечье",
+                    inventoryType = ExerciseInventoryType.BARBELL,
                 ),
                 ExerciseListItem(
                     name = "Тяга штанги к поясу",

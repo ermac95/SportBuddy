@@ -88,7 +88,6 @@ private fun HistoryWorkoutScreenContent(
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .padding(bottom = 100.dp)
                     .fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)

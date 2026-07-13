@@ -80,6 +80,14 @@ internal class CreateWorkoutViewModel @Inject constructor(
                 title = "1 мин 30 сек",
                 duration = 90.seconds,
             ),
+            TimeInterval(
+                title = "2 мин",
+                duration = 120.seconds,
+            ),
+            TimeInterval(
+                title = "2 мин 30 сек",
+                duration = 150.seconds,
+            )
         )
     ).stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
 
