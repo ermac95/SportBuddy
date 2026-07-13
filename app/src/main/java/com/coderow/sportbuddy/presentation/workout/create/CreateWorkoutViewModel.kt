@@ -62,7 +62,7 @@ internal class CreateWorkoutViewModel @Inject constructor(
         persistentListOf(
             TimeInterval(
                 title = "30 сек",
-                duration = 35.seconds,
+                duration = 30.seconds,
             ),
             TimeInterval(
                 title = "45 сек",

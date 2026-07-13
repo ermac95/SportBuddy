@@ -17,7 +17,8 @@ import com.coderow.sportbuddy.presentation.mainscreen.MainMenuScreen
 import com.coderow.sportbuddy.presentation.mainscreen.model.MainMenuItemType
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
 import com.coderow.sportbuddy.presentation.workout.create.CreateWorkoutScreen
-import com.coderow.sportbuddy.presentation.workout.history.HistoryWorkoutScreen
+import com.coderow.sportbuddy.presentation.workout.historydetails.HistoryWorkoutDetailsScreen
+import com.coderow.sportbuddy.presentation.workout.historylist.HistoryWorkoutScreen
 import com.coderow.sportbuddy.presentation.workout.list.ChooseWorkoutScreen
 import com.coderow.sportbuddy.presentation.workout.start.SelectedWorkoutScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -87,6 +88,10 @@ class MainActivity : ComponentActivity() {
                         composable<HistoryWorkout> {
                             HistoryWorkoutScreen(navController)
                         }
+
+                        composable<WorkoutHistoryDetails> {
+                            HistoryWorkoutDetailsScreen(navController)
+                        }
                     }
                 }
             }
@@ -114,3 +119,6 @@ data class SelectedWorkout(val workoutId: String)
 
 @Serializable
 object HistoryWorkout
+
+@Serializable
+data class WorkoutHistoryDetails(val workoutId: String)

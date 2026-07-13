@@ -46,6 +46,7 @@
     <string name="repetition_weight_point_title" translatable="false">Вес инвентаря:</string>
     <string name="repetition_weight_kg_value" translatable="false">%1$s кг</string>
 
+    <string name="workout_exercises_point_title" translatable="false">Упражнения:</string>
     <string name="workout_completed_title" translatable="false">Тренировка \n\"%1$s\" завершена!</string>
-    <string name="exercise_rep_number" translatable="false">Подход №%1$s:</string>
+    <string name="exercise_rep_number" translatable="false">Подход №%1$s</string>
 </resources>

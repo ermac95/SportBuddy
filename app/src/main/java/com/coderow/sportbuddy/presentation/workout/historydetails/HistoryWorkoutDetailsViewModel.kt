@@ -1,37 +1,37 @@
-package com.coderow.sportbuddy.presentation.workout.history
+package com.coderow.sportbuddy.presentation.workout.historydetails
 
+import androidx.lifecycle.SavedStateHandle
 import com.coderow.sportbuddy.core.presentation.BaseViewModel
+import com.coderow.sportbuddy.core.utils.flowOf
 import com.coderow.sportbuddy.data.repository.WorkoutHistoryRepository
 import com.coderow.sportbuddy.domain.WorkoutExerciseHistoryTemplate
 import com.coderow.sportbuddy.domain.WorkoutExerciseHistoryTemplate.ExerciseSetInfo
 import com.coderow.sportbuddy.domain.WorkoutHistoryTemplate
-import com.coderow.sportbuddy.presentation.workout.history.model.WorkoutHistoryListItem
-import com.coderow.sportbuddy.presentation.workout.history.model.WorkoutHistoryListItem.ExerciseHistoryItem
-import com.coderow.sportbuddy.presentation.workout.history.model.WorkoutHistoryListItem.ExerciseHistoryItem.ExerciseSetInfoItem
+import com.coderow.sportbuddy.presentation.workout.historylist.model.WorkoutHistoryListItem
+import com.coderow.sportbuddy.presentation.workout.historylist.model.WorkoutHistoryListItem.ExerciseHistoryItem
+import com.coderow.sportbuddy.presentation.workout.historylist.model.WorkoutHistoryListItem.ExerciseHistoryItem.ExerciseSetInfoItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class HistoryWorkoutViewModel @Inject constructor(
+class HistoryWorkoutDetailsViewModel @Inject constructor(
     repository: WorkoutHistoryRepository,
-) : BaseViewModel()  {
+    savedStateHandle: SavedStateHandle,
+) : BaseViewModel() {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val workoutsListFlow: StateFlow<ImmutableList<WorkoutHistoryListItem>> = repository.observeAllWorkouts().mapLatest { exercises ->
-        val items = exercises.map { it.toUiModel() }
-        items.toImmutableList()
-    }.stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
+    val workoutId: String = checkNotNull(
+        savedStateHandle["workoutId"]
+    )
+
+    val selectedWorkoutFlow = flowOf {
+        val selectedWorkout = repository.getWorkoutById(workoutId) ?: return@flowOf null
+        selectedWorkout.toUiModel()
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     private val formatter = SimpleDateFormat(
         "d MMMM yyyy 'г.'",

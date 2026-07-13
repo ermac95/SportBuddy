@@ -1,4 +1,4 @@
-package com.coderow.sportbuddy.presentation.workout.history.model
+package com.coderow.sportbuddy.presentation.workout.historylist.model
 
 import kotlinx.collections.immutable.ImmutableList
 

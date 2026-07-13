@@ -1,4 +1,4 @@
-package com.coderow.sportbuddy.presentation.workout.history
+package com.coderow.sportbuddy.presentation.workout.historylist
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -33,9 +33,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.coderow.sportbuddy.R
 import com.coderow.sportbuddy.core.presentation.cardShape
+import com.coderow.sportbuddy.core.utils.clickableWithDebounceAndSoundEffect
+import com.coderow.sportbuddy.core.utils.observe
+import com.coderow.sportbuddy.presentation.WorkoutHistoryDetails
 import com.coderow.sportbuddy.presentation.ui.compose.ScreenTopAppBar
 import com.coderow.sportbuddy.presentation.ui.theme.SportBuddyTheme
-import com.coderow.sportbuddy.presentation.workout.history.model.WorkoutHistoryListItem
+import com.coderow.sportbuddy.presentation.workout.historydetails.model.HistoryWorkoutCommand
+import com.coderow.sportbuddy.presentation.workout.historylist.model.WorkoutHistoryListItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -47,16 +51,26 @@ internal fun HistoryWorkoutScreen(
 
     val workoutsList by viewModel.workoutsListFlow.collectAsStateWithLifecycle()
 
-    ChooseWorkoutScreenContent(
+    viewModel.commandFlow.observe { command ->
+        when (command) {
+            is HistoryWorkoutCommand.OpenWorkoutDetails -> {
+                navController.navigate(WorkoutHistoryDetails(command.id))
+            }
+        }
+    }
+
+    HistoryWorkoutScreenContent(
         items = workoutsList,
-        onBackButtonClick = { navController.popBackStack() }
+        onBackButtonClick = { navController.popBackStack() },
+        onWorkoutClick = viewModel::onWorkoutClick,
     )
 }
 
 @Composable
-private fun ChooseWorkoutScreenContent(
+private fun HistoryWorkoutScreenContent(
     items: ImmutableList<WorkoutHistoryListItem>,
     onBackButtonClick: () -> Unit,
+    onWorkoutClick: (workoutId: String) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -82,6 +96,7 @@ private fun ChooseWorkoutScreenContent(
                 items(items) { workout ->
                     WorkoutCard(
                         item = workout,
+                        onWorkoutClick = onWorkoutClick,
                     )
                 }
             }
@@ -92,6 +107,7 @@ private fun ChooseWorkoutScreenContent(
 @Composable
 private fun WorkoutCard(
     item: WorkoutHistoryListItem,
+    onWorkoutClick: (workoutId: String) -> Unit,
 ) {
     val borderColor = Color.DarkGray
 
@@ -102,7 +118,10 @@ private fun WorkoutCard(
             .border(
                 border = BorderStroke(4.dp, borderColor),
                 shape = cardShape
-            ),
+            )
+            .clickableWithDebounceAndSoundEffect {
+                onWorkoutClick(item.id)
+            },
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -153,61 +172,24 @@ private fun WorkoutCard(
             }
 
             // Список упражнений
+            // Дата тренировки
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = stringResource(R.string.workout_exercises_point_title),
+                textAlign = TextAlign.Start,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+            )
             item.exercises.forEachIndexed { index, exerciseItem ->
                 // Номер и название упражнения
                 Text(
                     modifier = Modifier
-                        .padding(top = 8.dp)
                         .fillMaxWidth(),
                     text = "${index + 1}. ${exerciseItem.name}",
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold,
                 )
-
-                exerciseItem.setsInfo.forEachIndexed { index, item ->
-                    // Номер подхода
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .fillMaxWidth(),
-                        text = stringResource(R.string.exercise_rep_number, index + 1),
-                        textAlign = TextAlign.Start,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                    )
-
-                    // Количество повторений
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.repetition_number_point_title),
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = item.reps,
-                            color = Color.Black,
-                        )
-                    }
-                    // Используемый вес
-                    if (item.weight.isNotBlank()) {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.repetition_weight_point_title),
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(
-                                text = stringResource(R.string.repetition_weight_kg_value, item.weight),
-                                color = Color.Black,
-                            )
-                        }
-                    }
-                }
             }
         }
     }
@@ -217,7 +199,7 @@ private fun WorkoutCard(
 @Composable
 fun WorkoutHistoryScreenPreview() {
     SportBuddyTheme {
-        ChooseWorkoutScreenContent(
+        HistoryWorkoutScreenContent(
             items = persistentListOf(
                 WorkoutHistoryListItem(
                     id = "12312",
@@ -272,6 +254,7 @@ fun WorkoutHistoryScreenPreview() {
                 )
             ),
             onBackButtonClick = {},
+            onWorkoutClick = {},
         )
     }
 }
